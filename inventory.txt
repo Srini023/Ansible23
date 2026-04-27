@@ -1,0 +1,42 @@
+vim inventory.ini
+
+2 host names
+
+adhoc commands
+ansible -i inventory.ini -m ping all
+ansible -i inventory.ini -m shell -a "apt install nginx" all
+ ansible -i inventory.ini -m shell -a "sudo ls /etc/" all
+ ansible -i inventory.ini all -m apt -a "name=nginx state=present update_cache=yes" --become
+ansible → Runs Ansible in ad‑hoc mode (single command, not a playbook).
+
+-i inventory.ini → Tells Ansible to use your custom inventory file instead of /etc/ansible/hosts.
+
+all → Target group. Here it means “run on all hosts listed in inventory.ini”.
+
+-m apt → Use the apt module (Ansible’s built‑in package manager for Debian/Ubuntu).
+
+-a "name=nginx state=present update_cache=yes" → Arguments for the module:
+
+name=nginx → Package to install.
+
+state=present → Ensure the package is installed (idempotent: won’t reinstall if already present).
+
+update_cache=yes → Run apt-get update first to refresh package lists.
+
+--become → Escalates privileges (like sudo) so the task can install packages.
+✅ What Happens
+Ansible connects to each host via SSH.
+
+It refreshes the apt package index (update_cache=yes).
+
+It installs Nginx if not already installed (state=present).
+
+Because --become is used, it runs the task as root (otherwise you’d get “Permission denied” errors like before).
+
+⚡ Why This Is Better Than shell
+Using apt module is idempotent: if Nginx is already installed, it won’t reinstall.
+
+Handles errors and package cache updates cleanly.
+
+No need to hardcode sudo or worry about lock files.
+
