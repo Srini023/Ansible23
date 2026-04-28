@@ -1,0 +1,82 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Install apache httpd
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html
+        owner: root
+        group: root
+        mode: '0644'
+
+  ansible-playbook -i inventory.ini Play1.yaml
+
+  O/P:
+    PLAY [all] *******************************************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************************
+[WARNING]: Host 'cloud2390ag@34.172.151.81' is using the discovered Python interpreter at '/usr/bin/python3.11', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [cloud2390ag@34.172.151.81]
+[WARNING]: Host 'debian@34.27.64.120' is using the discovered Python interpreter at '/usr/bin/python3.11', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [debian@34.27.64.120]
+
+TASK [Install apache httpd] **************************************************************************************************************************************************
+changed: [debian@34.27.64.120]
+changed: [cloud2390ag@34.172.151.81]
+
+TASK [Copy file with owner and permissions] **********************************************************************************************************************************
+[ERROR]: Task failed: Unexpected AnsibleActionFail error: Could not find or access 'index.html'
+Searched in:
+        /home/srini/Ansible/files/index.html
+        /home/srini/Ansible/index.html
+        /home/srini/Ansible/files/index.html
+        /home/srini/Ansible/index.html on the Ansible Controller.
+If you are using a module and expect the file to exist on the remote, see the remote_src option
+Origin: /home/srini/Ansible/Play1.yaml:10:7
+
+ 8         state: present
+ 9         update_cache: yes
+10     - name: Copy file with owner and permissions
+         ^ column 7
+
+fatal: [debian@34.27.64.120]: FAILED! => {"changed": false, "msg": "Unexpected AnsibleActionFail error: Could not find or access 'index.html'\nSearched in:\n\t/home/srini/Ansible/files/index.html\n\t/home/srini/Ansible/index.html\n\t/home/srini/Ansible/files/index.html\n\t/home/srini/Ansible/index.html on the Ansible Controller.\nIf you are using a module and expect the file to exist on the remote, see the remote_src option"}
+fatal: [cloud2390ag@34.172.151.81]: FAILED! => {"changed": false, "msg": "Unexpected AnsibleActionFail error: Could not find or access 'index.html'\nSearched in:\n\t/home/srini/Ansible/files/index.html\n\t/home/srini/Ansible/index.html\n\t/home/srini/Ansible/files/index.html\n\t/home/srini/Ansible/index.html on the Ansible Controller.\nIf you are using a module and expect the file to exist on the remote, see the remote_src option"}
+
+PLAY RECAP *******************************************************************************************************************************************************************
+cloud2390ag@34.172.151.81  : ok=2    changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
+debian@34.27.64.120        : ok=2    changed=1    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
+
+
+need to rectify the fatal
+
+The error is clear: Ansible cannot find the index.html file on your controller machine (your WSL/Ubuntu environment). The copy module always looks for the source file locally on the controller unless you explicitly set remote_src: yes.
+
+create a local index.html in Contol node and again re run the play.
+srini@DESKTOP-SV1NS5U:~/Ansible$ vim index.html
+srini@DESKTOP-SV1NS5U:~/Ansible$ ansible-playbook -i inventory.ini Play1.yaml
+
+PLAY [all] *******************************************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************************
+[WARNING]: Host 'cloud2390ag@34.172.151.81' is using the discovered Python interpreter at '/usr/bin/python3.11', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [cloud2390ag@34.172.151.81]
+[WARNING]: Host 'debian@34.27.64.120' is using the discovered Python interpreter at '/usr/bin/python3.11', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [debian@34.27.64.120]
+
+TASK [Install apache httpd] **************************************************************************************************************************************************
+ok: [cloud2390ag@34.172.151.81]
+ok: [debian@34.27.64.120]
+
+TASK [Copy file with owner and permissions] **********************************************************************************************************************************
+changed: [cloud2390ag@34.172.151.81]
+changed: [debian@34.27.64.120]
+
+PLAY RECAP *******************************************************************************************************************************************************************
+cloud2390ag@34.172.151.81  : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+debian@34.27.64.120        : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
