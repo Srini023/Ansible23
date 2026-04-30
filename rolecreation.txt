@@ -1,0 +1,83 @@
+ansible-galaxy role init test
+cd test
+ls to view the test contents
+README.md  defaults  files  handlers  meta  tasks  templates  tests  vars
+ansible galaxy is used to create roles
+
+creating a role
+
+ ansible-galaxy role init httpd
+- Role httpd was created successfully
+
+ ls -ltr httpd
+total 36
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 tests
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 templates
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 meta
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 handlers
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 files
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 defaults
+-rw-r--r-- 1 srini srini 1328 Apr 30 12:05 README.md
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 vars
+drwxr-xr-x 2 srini srini 4096 Apr 30 12:05 tasks
+
+
+
+ tasks:
+    - name: Install apache httpd
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html
+        owner: root
+        group: root
+        mode: '0644'
+
+	create a new play or modify an existing one
+	now we can move the index.html to the files folder of the newly created role httpd
+	go to the task --> nain.yml-> change the src of the index.html to files/index.
+       html
+
+       cat Play2.yaml
+---
+- hosts: all
+  become: true
+  roles:
+   - httpd
+
+    ansible-playbook -i inventory.ini Play2.yaml
+
+
+PLAY [all] *************************************************************************************************************
+
+TASK [Gathering Facts] *************************************************************************************************
+[WARNING]: Host 'ubuntu@3.111.57.40' is using the discovered Python interpreter at '/usr/bin/python3.14', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [ubuntu@3.111.57.40]
+[WARNING]: Host 'ubuntu@13.233.41.190' is using the discovered Python interpreter at '/usr/bin/python3.14', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [ubuntu@13.233.41.190]
+[WARNING]: Host 'cloud2390ag@136.119.155.156' is using the discovered Python interpreter at '/usr/bin/python3.11', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [cloud2390ag@136.119.155.156]
+[WARNING]: Host 'debian@34.135.147.229' is using the discovered Python interpreter at '/usr/bin/python3.11', but future installation of another Python interpreter could cause a different interpreter to be discovered. See https://docs.ansible.com/ansible-core/2.20/reference_appendices/interpreter_discovery.html for more information.
+ok: [debian@34.135.147.229]
+
+TASK [httpd : Install apache httpd] ************************************************************************************
+ok: [ubuntu@13.233.41.190]
+ok: [ubuntu@3.111.57.40]
+ok: [cloud2390ag@136.119.155.156]
+ok: [debian@34.135.147.229]
+
+TASK [httpd : Copy file with owner and permissions] ********************************************************************
+ok: [ubuntu@13.233.41.190]
+ok: [ubuntu@3.111.57.40]
+ok: [debian@34.135.147.229]
+ok: [cloud2390ag@136.119.155.156]
+
+PLAY RECAP *************************************************************************************************************
+cloud2390ag@136.119.155.156 : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+debian@34.135.147.229      : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+ubuntu@13.233.41.190       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+ubuntu@3.111.57.40         : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
