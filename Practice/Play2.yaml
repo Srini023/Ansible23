@@ -1,0 +1,31 @@
+---
+- hosts: GCP
+  connection: local
+
+  tasks:
+  - name: Create GCP instances
+    google.cloud.gcp_compute_instance:
+      name: "{{ item.name }}"
+      machine_type: "e2-micro"              # Equivalent to t2.micro
+      zone: "us-central1-f"                 # Replace with your desired zone
+      project: "{{ gcp_project }}"          # From vault or vars
+      auth_kind: "serviceaccount"
+      service_account_file: "{{ gcp_sa_key }}"  # Path to JSON key file
+      disks:
+        - auto_delete: true
+          boot: true
+          initialize_params:
+            source_image: "{{ item.image }}" # Public image or custom image
+      network_interfaces:
+        - network: "default"
+          access_configs:
+            - name: "External NAT"
+              type: "ONE_TO_ONE_NAT"
+      tags:
+        items:
+          - "{{ item.name }}"
+    loop:
+      - { image: "projects/debian-cloud/global/images/family/debian-11", name: "manage-node-1" }
+      - { image: "projects/debian-cloud/global/images/family/debian-11", name: "manage-node-2" }
+      - { image: "projects/debian-cloud/global/images/family/debian-11", name: "manage-node-3" }
+
